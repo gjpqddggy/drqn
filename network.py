@@ -4,7 +4,12 @@ from tensorflow.keras.layers import (Add, Conv2D, Dense, Flatten, Input,
                                      Lambda, Subtract)
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam, RMSprop
+from config import BATCH_SIZE
 
+def reshape(out):
+    shape = out.get_shape().as_list()
+    out_flat = tf.reshape(out, [tf.shape(out)[0], 1, shape[1] * shape[2] * shape[3]])
+    return out_flat
 
 def build_q_network(n_actions, learning_rate=0.00001, input_shape=(84, 84), history_length=4):
     """Builds a dueling DQN as a Keras model
@@ -18,14 +23,20 @@ def build_q_network(n_actions, learning_rate=0.00001, input_shape=(84, 84), hist
     """
     model_input = Input(shape=(input_shape[0], input_shape[1], history_length))
     x = Lambda(lambda layer: layer / 255)(model_input)  # normalize by 255
-
+    #print(x.shape)
     x = Conv2D(32, (8, 8), strides=4, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
     x = Conv2D(64, (4, 4), strides=2, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
     x = Conv2D(64, (3, 3), strides=1, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
-    x = Conv2D(1024, (7, 7), strides=1, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
+    #print(x.get_shape())
+    out_flat = Lambda(lambda f: reshape(f))(x)
+    #print(out_flat.get_shape())
+    
+    lstm = tf.keras.layers.LSTM(512)
+    x = lstm(out_flat)
+    #print(x.get_shape())
 
     # Split into value and advantage streams
-    val_stream, adv_stream = Lambda(lambda w: tf.split(w, 2, 3))(x)  # custom splitting layer
+    val_stream, adv_stream = Lambda(lambda w: tf.split(w, num_or_size_splits=2, axis=1))(x)  # custom splitting layer
 
     val_stream = Flatten()(val_stream)
     val = Dense(1, kernel_initializer=VarianceScaling(scale=2.))(val_stream)

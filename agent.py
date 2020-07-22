@@ -162,6 +162,7 @@ class Agent(object):
         else:
             states, actions, rewards, new_states, terminal_flags = self.replay_buffer.get_minibatch(batch_size=self.batch_size, priority_scale=priority_scale)
 
+        #print(type(new_states))
         # Main DQN estimates best action in new states
         arg_q_max = self.DQN.predict(new_states).argmax(axis=1)
 
@@ -227,7 +228,7 @@ class Agent(object):
         """
 
         if not os.path.isdir(folder_name):
-            raise ValueError(f'{folder_name} is not a valid directory')
+            raise ValueError('{folder_name} is not a valid directory')
 
         # Load DQNs
         self.DQN = tf.keras.models.load_model(folder_name + '/dqn.h5')

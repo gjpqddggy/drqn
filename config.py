@@ -33,9 +33,10 @@ MIN_REPLAY_BUFFER_SIZE = 50000    # The minimum size the replay buffer must be b
 MEM_SIZE = 1000000                # The maximum size of the replay buffer
 
 MAX_NOOP_STEPS = 20               # Randomly perform this number of actions before every evaluation to give it an element of randomness
-UPDATE_FREQ = 4                   # Number of actions between gradient descent steps
+UPDATE_FREQ = 1                   # Number of actions between gradient descent steps
 TARGET_UPDATE_FREQ = 1000         # Number of actions between when the target network is updated
 
 INPUT_SHAPE = (84, 84)            # Size of the preprocessed input frame. With the current model architecture, anything below ~80 won't work.
 BATCH_SIZE = 32                   # Number of samples the agent learns from at once
 LEARNING_RATE = 0.00001
+HISTORY_LENGTH = 1

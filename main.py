@@ -7,18 +7,18 @@ from network import build_q_network
 from prioritized_replay_buffer import ReplayBuffer
 from agent import Agent
 
-game_wrapper = GameWrapper(ENV_NAME, MAX_NOOP_STEPS)
+game_wrapper = GameWrapper(ENV_NAME, MAX_NOOP_STEPS, history_length = HISTORY_LENGTH)
 print("The environment has the following {} actions: {}".format(game_wrapper.env.action_space.n, game_wrapper.env.unwrapped.get_action_meanings()))
 
 # TensorBoard writer
 writer = tf.summary.create_file_writer(TENSORBOARD_DIR)
 
 # Build main and target networks
-MAIN_DQN = build_q_network(game_wrapper.env.action_space.n, LEARNING_RATE, input_shape=INPUT_SHAPE)
-TARGET_DQN = build_q_network(game_wrapper.env.action_space.n, input_shape=INPUT_SHAPE)
+MAIN_DQN = build_q_network(game_wrapper.env.action_space.n, LEARNING_RATE, input_shape=INPUT_SHAPE, history_length = HISTORY_LENGTH)
+TARGET_DQN = build_q_network(game_wrapper.env.action_space.n, input_shape=INPUT_SHAPE, history_length = HISTORY_LENGTH)
 
-replay_buffer = ReplayBuffer(size=MEM_SIZE, input_shape=INPUT_SHAPE, use_per=USE_PER)
-agent = Agent(MAIN_DQN, TARGET_DQN, replay_buffer, game_wrapper.env.action_space.n, input_shape=INPUT_SHAPE, batch_size=BATCH_SIZE, use_per=USE_PER)
+replay_buffer = ReplayBuffer(size=MEM_SIZE, input_shape=INPUT_SHAPE, use_per=USE_PER, history_length = HISTORY_LENGTH)
+agent = Agent(MAIN_DQN, TARGET_DQN, replay_buffer, game_wrapper.env.action_space.n, input_shape=INPUT_SHAPE, batch_size=BATCH_SIZE, use_per=USE_PER, history_length = HISTORY_LENGTH)
 
 # Training and evaluation
 if LOAD_FROM is None:
@@ -89,48 +89,48 @@ try:
                         tf.summary.scalar('Loss', np.mean(loss_list[-100:]), frame_number)
                         writer.flush()
 
-                    print(f'Game number: {str(len(rewards)).zfill(6)}  Frame number: {str(frame_number).zfill(8)}  Average reward: {np.mean(rewards[-10:]):0.1f}  Time taken: {(time.time() - start_time):.1f}s')
+                    print(f"Game number: {str(len(rewards)).zfill(6)}  Frame number: {str(frame_number).zfill(8)}  Average reward: {np.mean(rewards[-10:]):0.1f}  Time taken: {(time.time() - start_time):.1f}s")
 
             # Evaluation every `FRAMES_BETWEEN_EVAL` frames
-            terminal = True
-            eval_rewards = []
-            evaluate_frame_number = 0
-
-            for _ in range(EVAL_LENGTH):
-                if terminal:
-                    game_wrapper.reset(evaluation=True)
-                    life_lost = True
-                    episode_reward_sum = 0
-                    terminal = False
+            #terminal = True
+            #eval_rewards = []
+            #evaluate_frame_number = 0
+            #
+            #for _ in range(EVAL_LENGTH):
+            #    if terminal:
+            #        game_wrapper.reset(evaluation=True)
+            #        life_lost = True
+            #        episode_reward_sum = 0
+            #        terminal = False
 
                 # Breakout requires a "fire" action (action #1) to start the
                 # game each time a life is lost.
                 # Otherwise, the agent would sit around doing nothing.
-                action = 1 if life_lost else agent.get_action(frame_number, game_wrapper.state, evaluation=True)
+             #   action = 1 if life_lost else agent.get_action(frame_number, game_wrapper.state, evaluation=True)
 
                 # Step action
-                _, reward, terminal, life_lost = game_wrapper.step(action)
-                evaluate_frame_number += 1
-                episode_reward_sum += reward
+              #  _, reward, terminal, life_lost = game_wrapper.step(action)
+               # evaluate_frame_number += 1
+                #episode_reward_sum += reward
 
                 # On game-over
-                if terminal:
-                    eval_rewards.append(episode_reward_sum)
-
-            if len(eval_rewards) > 0:
-                final_score = np.mean(eval_rewards)
-            else:
-                # In case the game is longer than the number of frames allowed
-                final_score = episode_reward_sum
-            # Print score and write to tensorboard
-            print('Evaluation score:', final_score)
-            if WRITE_TENSORBOARD:
-                tf.summary.scalar('Evaluation score', final_score, frame_number)
-                writer.flush()
+            #    if terminal:
+            #        eval_rewards.append(episode_reward_sum)
+#
+ #           if len(eval_rewards) > 0:
+ #               final_score = np.mean(eval_rewards)
+#            else:
+#                # In case the game is longer than the number of frames allowed
+#               final_score = episode_reward_sum
+#            # Print score and write to tensorboard
+#            print('Evaluation score:', final_score)
+#            if WRITE_TENSORBOARD:
+#                tf.summary.scalar('Evaluation score', final_score, frame_number)
+#                writer.flush()
 
             # Save model
-            if len(rewards) > 300 and SAVE_PATH is not None:
-                agent.save(f'{SAVE_PATH}/save-{str(frame_number).zfill(8)}', frame_number=frame_number, rewards=rewards, loss_list=loss_list)
+#            if len(rewards) > 300 and SAVE_PATH is not None:
+#               agent.save(f'{SAVE_PATH}/save-{str(frame_number).zfill(8)}', frame_number=frame_number, rewards=rewards, loss_list=loss_list)
 except KeyboardInterrupt:
     print('\nTraining exited early.')
     writer.close()
