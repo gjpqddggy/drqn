@@ -6,9 +6,9 @@ ENV_NAME = 'BreakoutDeterministic-v4'
 # Loading and saving information.
 # If LOAD_FROM is None, it will train a new agent.
 # If SAVE_PATH is None, it will not save the agent
-LOAD_FROM = None
+LOAD_FROM = 'breakout-saves'
 SAVE_PATH = 'breakout-saves'
-LOAD_REPLAY_BUFFER = True
+LOAD_REPLAY_BUFFER = False
 
 WRITE_TENSORBOARD = True
 TENSORBOARD_DIR = 'tensorboard/'
