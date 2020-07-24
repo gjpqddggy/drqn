@@ -21,21 +21,21 @@ replay_buffer = ReplayBuffer(size=MEM_SIZE, input_shape=INPUT_SHAPE, use_per=USE
 agent = Agent(MAIN_DQN, TARGET_DQN, replay_buffer, game_wrapper.env.action_space.n, input_shape=INPUT_SHAPE, batch_size=BATCH_SIZE, use_per=USE_PER, history_length = HISTORY_LENGTH)
 
 # Training and evaluation
-if LOAD_FROM is None:
-    frame_number = 0
-    rewards = []
-    loss_list = []
-else:
+frame_number = 0
+rewards = []
+loss_list = []
+
+if LOAD_FROM is not None:
     print('Loading from', LOAD_FROM)
     meta = agent.load(LOAD_FROM, LOAD_REPLAY_BUFFER)
-
-    # Apply information loaded from meta
-    frame_number = meta['frame_number']
-    rewards = meta['rewards']
-    loss_list = meta['loss_list']
-
-    print('Loaded')
-
+    if meta is not None:
+        # Apply information loaded from meta
+        frame_number = meta['frame_number']
+        rewards = meta['rewards']
+        loss_list = meta['loss_list']
+        print('Loaded')
+    else:
+        print('Load failed, cannot find any saved model') 
 
 # Main loop
 try:

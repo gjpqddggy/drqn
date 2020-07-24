@@ -2,6 +2,7 @@ import json
 import os
 import numpy as np
 import tensorflow as tf
+import glob
 
 
 class Agent(object):
@@ -230,6 +231,13 @@ class Agent(object):
         if not os.path.isdir(folder_name):
             raise ValueError('{folder_name} is not a valid directory')
 
+        list_of_files = glob.glob(folder_name + '/*')
+        # print(list_of_files) # * means all if need specific format then *.csv
+        if not list_of_files: return None
+        latest_file = max(list_of_files, key=os.path.getctime)
+        print(latest_file)
+        
+        folder_name = latest_file
         # Load DQNs
         self.DQN = tf.keras.models.load_model(folder_name + '/dqn.h5')
         self.target_dqn = tf.keras.models.load_model(folder_name + '/target_dqn.h5')

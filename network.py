@@ -24,9 +24,12 @@ def build_q_network(n_actions, learning_rate=0.00001, input_shape=(84, 84), hist
     model_input = Input(shape=(input_shape[0], input_shape[1], history_length))
     x = Lambda(lambda layer: layer / 255)(model_input)  # normalize by 255
     #print(x.shape)
-    x = Conv2D(32, (8, 8), strides=4, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
-    x = Conv2D(64, (4, 4), strides=2, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
-    x = Conv2D(64, (3, 3), strides=1, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
+    AE_model = tf.keras.models.load_model("./checkpoint/AE.h5", compile=False)
+    AE_model.trainable = False
+    encoder = AE_model.layers[0]
+    # x = Conv2D(32, (8, 8), strides=4, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
+    # x = Conv2D(64, (4, 4), strides=2, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
+    # x = Conv2D(64, (3, 3), strides=1, kernel_initializer=VarianceScaling(scale=2.), activation='relu', use_bias=False)(x)
     #print(x.get_shape())
     out_flat = Lambda(lambda f: reshape(f))(x)
     #print(out_flat.get_shape())
